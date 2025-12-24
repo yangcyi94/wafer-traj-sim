@@ -95,8 +95,8 @@ STEPS_TOTAL = int(TOTAL_TIME / STEP_SEC) + 1   # +1 so the final time is include
 
 if STEPS_TOTAL > 1000:
     st.warning(
-        "⚠️over 1000 steps "
-        "please retry with smaller time or bigger second per step.")
+        "⚠️over 1000 steps --- "
+        "please retry with SMALLER total_time or BIGGER second_per_step.")
     st.stop() 
 
 # degrees added each step (RPM × 6°/s × STEP_SEC)
