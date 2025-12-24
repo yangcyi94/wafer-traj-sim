@@ -277,19 +277,19 @@ for i in range(STEPS_TOTAL):
                 ),
                 # trajectories up to current step
                 go.Scatter(x=pa_x[: i + 1], y=pa_y[: i + 1],
-                           mode="lines", line=dict(color="blue", width=2, shape="spline", smoothing=1.2)),
+                           mode="lines", line=dict(color="blue", width=2, shape="spline", smoothing=1.3)),
                 go.Scatter(x=pl_x[: i + 1], y=pl_y[: i + 1],
-                           mode="lines", line=dict(color="black", width=1, shape="spline", smoothing=1.2)),
+                           mode="lines", line=dict(color="black", width=1, shape="spline", smoothing=1.3)),
                 go.Scatter(x=wa_x_traj[: i + 1], y=wa_y_traj[: i + 1],
-                           mode="lines", line=dict(color="black", width=1, shape="spline", smoothing=1.2, dash="dot")),
+                           mode="lines", line=dict(color="black", width=1, shape="spline", smoothing=1.3, dash="dot")),
                 go.Scatter(x=pa2_x[: i + 1], y=pa2_y[: i + 1],
-                           mode="lines", line=dict(color=green_color, width=green_width, shape="spline", smoothing=1.2)),
+                           mode="lines", line=dict(color=green_color, width=green_width, shape="spline", smoothing=1.3)),
                 # orange line: Green  → Blue (three points)
                 go.Scatter(
                     x=[pa2_x[i], pa_x[i]],
                     y=[pa2_y[i], pa_y[i]],
                     mode="lines",
-                    line=dict(color="orange", width=1, shape="spline", smoothing=1.2),
+                    line=dict(color="orange", width=1, shape="spline", smoothing=1.3),
                 ),
                 
                 
@@ -414,4 +414,3 @@ fig.update_layout(
 # -------------------------------------------------
 
 st.plotly_chart(fig, use_container_width=False)
-
