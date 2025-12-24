@@ -8,13 +8,13 @@ import pandas as pd
 # 1️⃣  Default session‑state values (run only once)
 # -------------------------------------------------
 if "STEP_SEC" not in st.session_state:
-    st.session_state.STEP_SEC = 0.01          # seconds per step
+    st.session_state.STEP_SEC = 0.02          # seconds per step
 if "TOTAL_TIME" not in st.session_state:
     st.session_state.TOTAL_TIME = 10         # total simulation time (seconds)
 if "PLATEN_RPM" not in st.session_state:
-    st.session_state.PLATEN_RPM = 50
+    st.session_state.PLATEN_RPM = 86
 if "POINTA_RPM" not in st.session_state:
-    st.session_state.POINTA_RPM = 30
+    st.session_state.POINTA_RPM = 92
 if "POINTA_RADIUS" not in st.session_state:
     st.session_state.POINTA_RADIUS = 100
 
@@ -210,7 +210,16 @@ fig.add_shape(
     xref="x", yref="y",
     x0=-PLATEN_RADIUS, y0=-PLATEN_RADIUS,
     x1= PLATEN_RADIUS, y1= PLATEN_RADIUS,
-    line_color="rgba(32,178,170,0.001)",
+    line_color="rgba(0,0,0,0.5)",
+    fillcolor="rgba(0,0,0,0)",
+)
+
+fig.add_shape(
+    type="circle",
+    xref="x", yref="y",
+    x0=-150, y0= WAFER_NEAR-150,
+    x1= 150, y1= WAFER_NEAR+150,
+    line_color="rgba(0,0,0,0.5)",
     fillcolor="rgba(0,0,0,0)",
 )
 
@@ -300,7 +309,7 @@ for i in range(STEPS_TOTAL):
                     x=times,
                     y=dist_a1[: i + 1],
                     mode="lines+markers",
-                    line=dict(color="blue", width=2),
+                    line=dict(color="blue", width=1, shape="spline", smoothing=1.3),
                     marker=dict(size=4),
                 ),
                 # Dist A2
@@ -308,7 +317,7 @@ for i in range(STEPS_TOTAL):
                     x=times,
                     y=dist_a2[: i + 1],
                     mode="lines+markers",
-                    line=dict(color="green", width=2),
+                    line=dict(color="green", width=1, shape="spline", smoothing=1.3),
                     marker=dict(size=4),
                 ),
                 # Dist Wafer
@@ -316,7 +325,7 @@ for i in range(STEPS_TOTAL):
                     x=times,
                     y=dist_wa[: i + 1],
                     mode="lines+markers",
-                    line=dict(color="black", width=2, dash="dot"),
+                    line=dict(color="black", width=1, shape="spline", smoothing=1.3, dash="dot"),
                     marker=dict(size=4),
                 ),
             ],
