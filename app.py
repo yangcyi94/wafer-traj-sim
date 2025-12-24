@@ -81,7 +81,7 @@ with st.sidebar.form(key="param_form"):
 if not st.session_state.get("show_plot", False):
     st.info(
         "Set the parameters on the left sidebar and click **Update** to generate the plot.\n"
-        "⚠️ If STEP_SEC is very small or TOTAL_TIME is large, many points will be created "
+        "⚠️ If second_per_STEP is very small or TOTAL_TIME is large, many points will be created "
         "and rendering may take several mins."
     )
     st.stop()   # stop execution until the user clicks Update
