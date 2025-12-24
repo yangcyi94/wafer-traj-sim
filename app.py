@@ -43,7 +43,7 @@ with st.sidebar.form(key="param_form"):
         "PointA Radius (mm)", min_value=1, value=st.session_state.POINTA_RADIUS, step=1
     )
     st.session_state.STEP_SEC = st.slider(
-        "second per STEP", min_value=0.01, max_value=0.1,
+        "second per STEP", min_value=0.01, max_value=0.2,
         value=st.session_state.STEP_SEC, step=0.01, format="%.2f"
     )
     st.session_state.TOTAL_TIME = st.slider(
