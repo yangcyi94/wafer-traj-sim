@@ -52,18 +52,18 @@ with st.sidebar.form(key="param_form"):
     )
     st.session_state.SWEEP_START = st.slider(
         "Sweep START (inch)", min_value=6.0, max_value=7.3,
-        value=float(st.session_state.SWEEP_START), step=0.01, format="%.2f"
+        value=float(st.session_state.SWEEP_START), step=0.1, format="%.2f"
     )
     st.session_state.SWEEP_END = st.slider(
         "Sweep END (inch)", min_value=8.0, max_value=8.4,
-        value=float(st.session_state.SWEEP_END), step=0.01, format="%.2f"
+        value=float(st.session_state.SWEEP_END), step=0.1, format="%.2f"
     )
     st.session_state.SWPS_MIN = st.slider(
         "Swps per minute", min_value=13, max_value=20,
         value=int(st.session_state.SWPS_MIN), step=1
     )
     st.session_state.PEND_MODE = st.selectbox(
-        "Sweep mode", options=["Sine", "Custom"],
+        "Sweep mode", options=["Sine", "Custom(1)"],
         index=0 if st.session_state.PEND_MODE == "Sine" else 1
     )
     st.session_state.SHOW_GREEN = st.checkbox(
@@ -104,7 +104,7 @@ deg_per_step_platen = st.session_state.PLATEN_RPM * 6.0 * STEP_SEC
 deg_per_step_pointa = st.session_state.POINTA_RPM * 6.0 * STEP_SEC
 
 # pendulum frequency (swings per minute → cycles per step)
-WAFER_PENDULUM_FREQ = st.session_state.SWPS_MIN * STEP_SEC / 60.0
+WAFER_PENDULUM_FREQ = st.session_state.SWPS_MIN * STEP_SEC / 30
 
 # wafer‑center sweep range (inch → mm)
 WAFER_NEAR = st.session_state.SWEEP_START * 2.54 * 10   # mm
