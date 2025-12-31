@@ -207,5 +207,6 @@ Foundry CMP기술팀 김중희 / j34.kim	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 0	0	Cy (mm)	-420	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 0	Arm Length (mm)	0	610	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	ωR(rad/s)	VLOOKUP(G29,$B$10:$N$22,12)	0
+0	No.	Zone (in)-(in)	0	Relative Time	%	X1(mm)	Y1(mm)	X2(mm)	Y2(mm)	θ(rad)	t(s)	ω(rad/s)	Vd(inch/s)	0	0	0	0	0	0	0	0	접선속도	SQRT((Q29*$O$27*ABS(N29/Q29)-E29*$D$7*R29*ABS(($D$6-N29)/$D$7))^2+(Q29*$O$27*ABS(M29/Q29)-E29*$D$7*R29*ABS(($D$5-M29)/$D$7))^2)	0
 
 
