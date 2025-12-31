@@ -214,4 +214,4 @@ Foundry CMP기술팀 김중희 / j34.kim	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 =IFERROR((-1*(CSim.Cal!$D$7^2-(C10*25.4)^2-CSim.Cal!$D$5^2-CSim.Cal!$D$6^2)-2*CSim.Cal!$D$5*G10)/(2*CSim.Cal!$D$6),NA())	
 =IFERROR((-1*(4*CSim.Cal!$D$5*(CSim.Cal!$D$7^2-(D10*25.4)^2-CSim.Cal!$D$5^2-CSim.Cal!$D$6^2))-SQRT((4*CSim.Cal!$D$5*(CSim.Cal!$D$7^2-(D10*25.4)^2-CSim.Cal!$D$5^2-CSim.Cal!$D$6^2))^2-4*(4*(CSim.Cal!$D$5^2+CSim.Cal!$D$6^2))*((CSim.Cal!$D$5^2+CSim.Cal!$D$6^2+(D10*25.4)^2-CSim.Cal!$D$7^2)^2-4*CSim.Cal!$D$6^2*(D10*25.4)^2)))/(2*(4*(CSim.Cal!$D$5^2+CSim.Cal!$D$6^2))),NA())	
 =IFERROR((-1*(CSim.Cal!$D$7^2-(D10*25.4)^2-CSim.Cal!$D$5^2-CSim.Cal!$D$6^2)-2*CSim.Cal!$D$5*I10)/(2*CSim.Cal!$D$6),NA())	
-=IFERROR(ASIN((SQRT((I10-G10)^2
+=IFERROR(ASIN((SQRT((I10-G10)^2 
