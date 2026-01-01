@@ -216,8 +216,7 @@ pos_F = solve_joint(373.38, 610, Jx, Jy)
 print(f"N 點座標: {pos_N}")
 print(f"F 點座標: {pos_F}")
 
-
-
+----------------------------------------------
 import math
 
 def get_arc_motion(t, T, Jx, Jy, Nx, Ny, Fx, Fy, R=610):
@@ -280,6 +279,78 @@ for sec in range(11):
         範例中使用 -amplitude * math.cos(...) 是為了讓 t=0 時位置在 N。
 
         如果你希望 t=0 時在中間往 F 移動，請改用 amplitude * math.sin(...)。
+------------------------------------------
+import math
+
+class ArcOscillator:
+    def __init__(self, Jx, Jy, R, zones_table):
+        self.Jx = Jx
+        self.Jy = Jy
+        self.R = R
+        # zones_table 格式: [[r_start, r_end, rel_time], ...]
+        self.zones = zones_table
+        self.sum_rel_time = sum(z[2] for z in zones_table)
+        
+    def _get_pos_by_radius(self, r):
+        """根據距原點半徑 r，計算在半徑為 R、圓心為 J 的圓上的座標"""
+        d2 = self.Jx**2 + self.Jy**2
+        K = (r**2 + d2 - self.R**2) / 2
+        # 判別式檢查
+        disc = (r**2 * d2) - K**2
+        if disc < 0: return (0, 0)
+        
+        # 根據示意圖取右下方交點
+        sqrt_disc = math.sqrt(disc)
+        xp = (K * self.Jx + self.Jy * sqrt_disc) / d2
+        yp = (K * self.Jy - self.Jx * sqrt_disc) / d2
+        return xp, yp
+
+    def get_position(self, t, T):
+        """
+        t: 當前時間
+        T: 單程 (N->F) 所需總時間
+        """
+        # 1. 實現來回擺動 (使用三角波映射)
+        # 週期為 2*T (N->F->N)
+        cycle_t = t % (2 * T)
+        if cycle_t > T:
+            target_t = 2 * T - cycle_t  # 返回階段 (F->N)
+        else:
+            target_t = cycle_t          # 前進階段 (N->F)
+            
+        # 2. 尋找當前所在的 Zone
+        elapsed_time = 0
+        for r_start, r_end, rel_t in self.zones:
+            zone_duration = (rel_t / self.sum_rel_time) * T
+            
+            if elapsed_time <= target_t <= (elapsed_time + zone_duration + 1e-9):
+                # 計算在該 Zone 內的進度比例 (0~1)
+                local_ratio = (target_t - elapsed_time) / zone_duration
+                # 在起始半徑與結束半徑間做線性插值
+                # 注意：這是在半徑空間等速，若要嚴格角度等速，可先轉角度再插值
+                current_r = r_start + (r_end - r_start) * local_ratio
+                return self._get_pos_by_radius(current_r)
+            
+            elapsed_time += zone_duration
+            
+        return self._get_pos_by_radius(self.zones[-1][1])
+
+# --- 初始化資料 ---
+# 依照圖片輸入: zone_num, r_start, r_end, relative_time
+data = [
+    [68.58, 92.03, 1], [92.03, 115.47, 1], [115.47, 138.92, 2],
+    [138.92, 162.36, 2], [162.36, 185.81, 3], [185.81, 209.26, 3],
+    [209.26, 232.70, 3], [232.70, 256.15, 3], [256.15, 279.60, 3],
+    [279.60, 303.04, 2], [303.04, 326.49, 2], [326.49, 349.93, 1],
+    [349.93, 373.38, 1]
+]
+
+# 假設 J 點在 (500, 200), R = 610
+oscillator = ArcOscillator(Jx=500, Jy=200, R=610, zones_table=data)
+
+# 測試：假設單程 T = 4 秒，計算 t = 5 秒 (回程中) 的位置
+pos = oscillator.get_position(t=5, T=4)
+print(f"t=5s (回程) 的座標: {pos}")
 """
 
 K_INIT_X, K_INIT_Y = 450.0, -420.0          # K 點起始座標               # 45° 逆時針
