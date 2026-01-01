@@ -163,6 +163,125 @@ def solve_joint(r, Xx, Xy, name="J"):
         raise ValueError(f"{name} error") #在第 4 象限找不到解"
     return valid[0]    
 
+
+"""
+import math
+
+def solve_joint(d_ori, d_J, Jx, Jy):
+    """
+    計算交點座標 (xp, yp)
+    d_ori: 點到原點 (0,0) 的距離 (r)
+    d_J:   點到 J 點 (Jx, Jy) 的距離 (R)
+    Jx, Jy: J 點的座標
+    """
+    # 1. 計算 J 點到原點距離的平方 (d^2)
+    d2 = Jx**2 + Jy**2
+    d = math.sqrt(d2)
+    
+    # 安全檢查：如果 J 點在原點，或距離太遠/太近導致圓不相交，則無解
+    if d == 0:
+        return None
+    
+    # 2. 根據餘弦定理推導出的常數項 K
+    # K = (r^2 + d^2 - R^2) / 2
+    K = (d_ori**2 + d2 - d_J**2) / 2
+    
+    # 3. 計算判別式 (檢查圓是否相交)
+    # 判別式 = r^2 * d^2 - K^2
+    discriminant = (d_ori**2 * d2) - K**2
+    
+    if discriminant < 0:
+        # 代表兩圓不相交
+        return None
+    
+    sqrt_disc = math.sqrt(discriminant)
+    
+    # 4. 計算座標 (這裡根據你的圖示，取特定的正負號以符合 N, F 點的位置)
+    # 這裡的公式考慮了旋轉變換
+    # xp = (K*Jx + Jy*sqrt_disc) / d^2
+    # yp = (K*Jy - Jx*sqrt_disc) / d^2
+    xp = (K * Jx + Jy * sqrt_disc) / d2
+    yp = (K * Jy - Jx * sqrt_disc) / d2
+    
+    return round(xp, 4), round(yp, 4)
+
+# --- 使用範例 ---
+Jx, Jy = 500, 100  # 假設 J 點座標
+
+# 計算 N 點
+pos_N = solve_joint(65.58, 610, Jx, Jy)
+# 計算 F 點
+pos_F = solve_joint(373.38, 610, Jx, Jy)
+
+print(f"N 點座標: {pos_N}")
+print(f"F 點座標: {pos_F}")
+
+
+
+import math
+
+def get_arc_motion(t, T, Jx, Jy, Nx, Ny, Fx, Fy, R=610):
+    """
+    t: 當前時間
+    T: 擺動週期
+    Jx, Jy: 圓心 J 的座標
+    Nx, Ny: 起點 N 的座標
+    Fx, Fy: 終點 F 的座標
+    R: 圓半徑 (預設 610)
+    """
+    
+    # 1. 計算 N 點與 F 點相對於圓心 J 的角度 (弧度)
+    # atan2(y, x) 會考慮象限，回傳 -pi 到 pi 之間的值
+    angle_N = math.atan2(Ny - Jy, Nx - Jx)
+    angle_F = math.atan2(Fy - Jy, Fx - Jx)
+    
+    # 處理跨越 -pi/pi 邊界的情況 (確保擺動路徑是短弧而非長弧)
+    diff = angle_F - angle_N
+    if diff > math.pi:
+        angle_F -= 2 * math.pi
+    elif diff < -math.pi:
+        angle_F += 2 * math.pi
+        
+    # 2. 定義正弦擺動的角度公式
+    # 我們希望在 t=0 時從中點開始，或可調整相位從 N 點開始
+    # 若要從 N 點 (起始點) 開始，公式調整為 cos 並加負號，或者調整相位
+    
+    angle_mid = (angle_N + angle_F) / 2
+    amplitude = (angle_F - angle_N) / 2
+    
+    # 這裡使用 -cos 讓 t=0 時點位恰好在 N 點 (因為 -cos(0)=-1, angle_mid - amp = angle_N)
+    current_angle = angle_mid - amplitude * math.cos((2 * math.pi / T) * t)
+    
+    # 3. 將當前角度轉回 (x, y) 座標
+    xt = Jx + R * math.cos(current_angle)
+    yt = Jy + R * math.sin(current_angle)
+    
+    return round(xt, 4), round(yt, 4)
+
+# --- 測試範例 ---
+T = 10  # 10秒一個週期
+Jx, Jy = 500, 100
+Nx, Ny = 60, -30   # 假設的 N 點
+Fx, Fy = 350, -120 # 假設的 F 點
+
+# 模擬在不同時間點的位置
+for sec in range(11):
+    pos = get_arc_motion(sec, T, Jx, Jy, Nx, Ny, Fx, Fy)
+    print(f"時間 {sec}s: 座標 {pos}")
+
+重點說明
+
+    atan2 的重要性：使用 math.atan2(y, x) 而非 atan(y/x)，是因為它能自動處理 x=0 的情況，並準確判斷點在圓周上的哪一個象限。
+
+    邊界修正：如果 N 點在 170∘ 而 F 點在 −170∘，它們之間其實只差 20∘。程式碼中的 diff 檢查確保點是走「短弧」路徑，不會繞遠路。
+
+    相位啟始：
+
+        範例中使用 -amplitude * math.cos(...) 是為了讓 t=0 時位置在 N。
+
+        如果你希望 t=0 時在中間往 F 移動，請改用 amplitude * math.sin(...)。
+"""
+
 K_INIT_X, K_INIT_Y = 450.0, -420.0          # K 點起始座標               # 45° 逆時針
 J_INIT_X, J_INIT_Y = calc_axis_rot(K_INIT_X, K_INIT_Y, 45)
 D_ININ_X, D_ININ_Y = solve_joint(Disk_Near_ini, J_INIT_X, J_INIT_Y, name="D_N")
