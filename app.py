@@ -6,7 +6,7 @@ import pandas as pd
 
 # -------------------------------------------------
 # 1️⃣  Default session‑state values (run only once)
-# -------------------------------------------------
+# ------------------------------------------------- 
 if "STEP_SEC" not in st.session_state:
     st.session_state.STEP_SEC = 0.02          # seconds per step
 if "TOTAL_TIME" not in st.session_state:
