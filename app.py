@@ -15,8 +15,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 # -------------------------------------------------
-# 1️⃣ 初始化 Session State (確保所有變數都存在)
-# ------------------------------------------------- 
+# 1️⃣ Initialize Session State (Ensure all variables exist)
+# -------------------------------------------------
 DEFAULTS = {
     "STEP_SEC": 0.02,
     "TOTAL_TIME": 10,
@@ -41,7 +41,7 @@ for key, val in DEFAULTS.items():
         st.session_state[key] = val
 
 # -------------------------------------------------
-# 2️⃣ 側邊欄：核心基礎設定
+# 2️⃣ Sidebar: Core Simulation Settings
 # -------------------------------------------------
 st.sidebar.header("⚙️ Setting")
 with st.sidebar:
@@ -51,12 +51,12 @@ with st.sidebar:
     st.session_state.TOTAL_TIME = st.slider("TOTAL_TIME (s)", 1, 99, int(st.session_state.TOTAL_TIME))
     st.session_state.POINTA_RADIUS = st.number_input("PointA Radius (mm)", 1, 150, st.session_state.POINTA_RADIUS)
     st.divider()
-    # 新增 A1 勾選與其餘開關
+    # Visibility toggles for plot elements
     st.checkbox("Show Point 1 (Blue)", key="SHOW_BLUE")
     st.checkbox("Show Point 2 (Green)", key="SHOW_GREEN")
     st.checkbox("Show Disk (Orange)", key="SHOW_ORANGE")
 # -------------------------------------------------
-# 3️⃣ 主畫面：圖表上方的詳細擺動設定
+# 3️⃣ Main UI: Detailed Sweep Parameters
 # -------------------------------------------------
 with st.container(border=True):
     col1, col2 = st.columns(2)
@@ -100,7 +100,7 @@ with col1:
     st.session_state.head_zone_df = st.data_editor(st.session_state.head_zone_df, hide_index=True, disabled=not is_head_custom, key="head_zone_editor")
     st.session_state.SWPS_MIN = st.slider("**Head Swps per minute**", 1, 25, int(st.session_state.SWPS_MIN))
     
-    # 新增：顯示 Head Sweep 的時間統計
+   
     h_half_cycle_time = (60.0 / st.session_state.SWPS_MIN) / 2.0
     h_total_rel_time = st.session_state.head_zone_df["Relative_Time"].sum()
     st.caption(f"📊 Head Sum of Rel Time: **{h_total_rel_time:.3f}**")
@@ -244,26 +244,26 @@ def solve_joint(d_ori, d_J, Jx, Jy):
     yp = (K * Jy - Jx * sqrt_disc) / d2
     return round(xp, 4), round(yp, 4)
 
-# 初始機械結構位置計算
+
 K_INIT_X, K_INIT_Y = 450.0, -420.0
 J_INIT_X, J_INIT_Y = calc_axis_rot(K_INIT_X, K_INIT_Y, 45)
 
-# 1. 計算 N -> F 的總相對時間與實際所需總秒數
-half_cycle_time = (60.0 / st.session_state.DSWPS_MIN) / 2.0  # N 到 F 實際花費秒數
+
+half_cycle_time = (60.0 / st.session_state.DSWPS_MIN) / 2.0 
 sum_relative_time = st.session_state.zone_df["Relative_Time"].sum()
 total_rel_time = st.session_state.zone_df["Relative_Time"].sum()
 h_half_cycle_time = (60.0 / st.session_state.SWPS_MIN) / 2.0
 h_sum_rel_time = st.session_state.head_zone_df["Relative_Time"].sum()
 
 
-# 2. 建立每個 Zone 的時間累積邊界 (秒)
+
 zone_time_boundaries = []
 current_time_acc = 0.0
 for rt in st.session_state.zone_df["Relative_Time"]:
     zone_duration = (rt / sum_relative_time) * half_cycle_time
     current_time_acc += zone_duration
     zone_time_boundaries.append(current_time_acc)
-# --- Head 時間邊界計算 ---
+
 head_time_boundaries = []
 h_acc = 0.0
 for rt in st.session_state.head_zone_df["Relative_Time"]:
@@ -272,21 +272,20 @@ for rt in st.session_state.head_zone_df["Relative_Time"]:
     head_time_boundaries.append(h_acc)
 
 for step in range(STEPS_TOTAL):
-    # --- 0. 時間基準定義 (必須放在最前面) ---
+
     t_elapsed = step * STEP_SEC
     
-    # ---- A. Platen (黑色大圓盤) 旋轉角度 ----
+    
     ang_pl = 90 + step * deg_per_step_platen
     rad_pl = math.radians(ang_pl)
     pl_x.append(PLATEN_RADIUS * math.cos(rad_pl))
     pl_y.append(PLATEN_RADIUS * math.sin(rad_pl))
 
-    # ---- B. Wafer (Head) 擺動半徑計算 (r_t) ----
+   
     h_t_cycle = (60.0 / st.session_state.SWPS_MIN)
     h_half_cycle = h_t_cycle / 2.0
     h_t_in_cycle = t_elapsed % h_t_cycle
 
-    # 映射時間 0 -> h_half_cycle (去程)
     if h_t_in_cycle <= h_half_cycle:
         h_t_lookup = h_t_in_cycle
     else:
@@ -298,11 +297,11 @@ for step in range(STEPS_TOTAL):
     h_amp_mm = (H_FAR_MM - H_NEAR_MM) / 2.0
 
     if st.session_state.head_mode == "Sine":
-        # Sine 模式：從 Near 開始 (-cos(0)=-1)
+        
         phi_w = 2.0 * math.pi * (st.session_state.SWPS_MIN / 60.0) * t_elapsed
         r_t = h_mid_mm - h_amp_mm * math.cos(phi_w)
     else:
-        # Custom 模式：從 Zone 1 (Near) 開始往後面的 Zone (Far) 移動
+       
         r_t = H_NEAR_MM
         for i in range(len(head_time_boundaries)):
             h_s_t = head_time_boundaries[i-1] if i > 0 else 0
@@ -316,7 +315,7 @@ for step in range(STEPS_TOTAL):
         else:
             r_t = H_FAR_MM
 
-    # ---- C. Disk 擺動半徑計算 (current_radius_d) ----
+    
     d_t_cycle = (60.0 / st.session_state.DSWPS_MIN) 
     d_half_cycle = d_t_cycle / 2.0
     d_t_in_cycle = t_elapsed % d_t_cycle
@@ -348,24 +347,23 @@ for step in range(STEPS_TOTAL):
         else:
             current_radius_d = DISK_NEAR_MM
 
-    # ---- D. 座標計算與旋轉 ----
-    # 1. Disk 座標逆推
+    
     d_raw = solve_joint(current_radius_d, DISK_ARM_LENGTH, J_INIT_X, J_INIT_Y)
     dxt_raw, dyt_raw = d_raw if d_raw else (0, 0)
     
-    # 2. 相對旋轉 (Platen 逆時針旋轉，物體相對於盤面需順時針旋轉)
+   
     rot_angle = math.radians(-step * deg_per_step_platen)
     def rotate_xy(x, y, rad):
         return x * math.cos(rad) - y * math.sin(rad), x * math.sin(rad) + y * math.cos(rad)
 
-    # 3. Wafer 中心軌跡 (依據 r_t)
+   
     wa_rad_pos = math.radians(90 - step * deg_per_step_platen)
     wx = r_t * math.cos(wa_rad_pos)
     wy = r_t * math.sin(wa_rad_pos)
     wa_x_traj.append(wx)
     wa_y_traj.append(wy)
 
-    # 4. Head Point A1 & A2
+   
     ang_a1_rel = math.radians(step * deg_per_step_pointa + 180) - rad_pl
     pa_x.append(wx + st.session_state.POINTA_RADIUS * math.cos(ang_a1_rel))
     pa_y.append(wy + st.session_state.POINTA_RADIUS * math.sin(ang_a1_rel))
@@ -374,7 +372,7 @@ for step in range(STEPS_TOTAL):
     pa2_x.append(wx + st.session_state.POINTA_RADIUS * math.cos(ang_a2_rel))
     pa2_y.append(wy + st.session_state.POINTA_RADIUS * math.sin(ang_a2_rel))
 
-    # 5. Disk 連桿與標記點旋轉
+    
     dx_curr, dy_curr = rotate_xy(dxt_raw, dyt_raw, rot_angle)
     disk_x.append(dx_curr); disk_y.append(dy_curr)
     
@@ -384,7 +382,7 @@ for step in range(STEPS_TOTAL):
     j_curr_x, j_curr_y = rotate_xy(J_INIT_X, J_INIT_Y, rot_angle)
     disk_axis_x.append(j_curr_x); disk_axis_y.append(j_curr_y)
 
-    # ---- E. 紀錄數據 ----
+    
     platen_rev.append((step * deg_per_step_platen) / 360.0)
     wafer_rev.append((step * deg_per_step_pointa) / 360.0)
     dist_a1.append(math.hypot(pa_x[-1], pa_y[-1]))
@@ -392,7 +390,7 @@ for step in range(STEPS_TOTAL):
     dist_wa.append(r_t)
     dist_d.append(current_radius_d)
 
-    # 紀錄 Disk N/F 邊界點 (用於 UI 參考)
+   
     dn_raw_x, dn_raw_y = solve_joint(DISK_NEAR_MM, DISK_ARM_LENGTH, J_INIT_X, J_INIT_Y)
     df_raw_x, df_raw_y = solve_joint(DISK_FAR_MM, DISK_ARM_LENGTH, J_INIT_X, J_INIT_Y)
     dn_curr_x, dn_curr_y = rotate_xy(dn_raw_x, dn_raw_y, rot_angle)
@@ -409,11 +407,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 # -------------------------------------------------
-# 7️⃣ Plotly Figure 設置 (隱藏參考點與修正 Legend)
+# 7️⃣ Plotly Figure Setup
 # -------------------------------------------------
 fig = make_subplots(rows=2, cols=1, vertical_spacing=0.1, row_heights=[0.9, 0.3])
 
-# background reference circle
+
 fig.add_shape(
     type="circle",
     xref="x", yref="y",
@@ -432,8 +430,7 @@ fig.add_shape(
     fillcolor="rgba(0,0,0,0)",
 )
 
-# Trace 名稱與顯示規則統一
-# Row 1: 軌跡
+
 fig.add_trace(go.Scatter(name="Point 1 (Blue) Traj", x=[], y=[], mode="lines", line=dict(color=c_blue, width=w_blue)), row=1, col=1)
 fig.add_trace(go.Scatter(name="Point 2 (Green) Traj", x=[], y=[], mode="lines", line=dict(color=c_green, width=w_green)), row=1, col=1)
 fig.add_trace(go.Scatter(name="Wafer Center Traj", x=[], y=[], mode="lines", line=dict(color="black", width=1, dash="dot")), row=1, col=1)
@@ -441,11 +438,11 @@ fig.add_trace(go.Scatter(name="Disk Traj", x=[], y=[], mode="lines", line=dict(c
 fig.add_trace(go.Scatter(name="Platen Edge Traj", x=[], y=[], mode="lines", line=dict(color="rgba(0,0,0,0.3)", width=1)), row=1, col=1)
 fig.add_trace(go.Scatter(name="Head Arm", x=[], y=[], mode="lines", line=dict(color="orange", width=1)), row=1, col=1)
 
-# 當前點 (Markers) - 包含所有動態點
+
 fig.add_trace(go.Scatter(name="Current Positions", x=[], y=[], mode="markers", 
                          marker=dict(size=6, color=[c_blue, c_green, "black", c_orange])), row=1, col=1)
 
-# Row 2: 距離圖
+
 fig.add_trace(go.Scatter(name="Dist P1", x=[], y=[], mode="lines", line=dict(color="blue")), row=2, col=1)
 fig.add_trace(go.Scatter(name="Dist P2", x=[], y=[], mode="lines", line=dict(color="green")), row=2, col=1)
 fig.add_trace(go.Scatter(name="Dist Wafer", x=[], y=[], mode="lines", line=dict(color="black", dash="dot")), row=2, col=1)
