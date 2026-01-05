@@ -67,14 +67,15 @@ with col1:
     st.session_state.head_mode = head_mode
     is_head_custom = (head_mode == "Custom")
     
-    h_zone_num = st.number_input("**Head Sweep Zone Num**", 8, 13, 10, disabled=not is_head_custom, key="h_zone_num_input")
-
+   
     hc1, hc2 = st.columns(2)
     with hc1:
         st.session_state.SWEEP_START = st.number_input("**Head START (in)**", 6.0, 7.0, 6.2, 0.1, key="h_start_input")
     with hc2:
         st.session_state.SWEEP_END = st.number_input("**Head END (in)**", 7.0, 9.0, 7.2, 0.1, key="h_end_input")
     
+    h_zone_num = st.number_input("**Head Sweep Zone Num**", 8, 13, 10, disabled=not is_head_custom, key="h_zone_num_input")
+
     h_near_mm = st.session_state.SWEEP_START * 25.4
     h_far_mm  = st.session_state.SWEEP_END * 25.4
     h_boundaries_mm = [h_near_mm + (h_far_mm - h_near_mm) * i / h_zone_num for i in range(h_zone_num + 1)]
@@ -97,7 +98,13 @@ with col1:
             h_data = {"Zone": [f"Zone {i+1}" for i in range(h_zone_num)], "Zone_Start": [round(h_boundaries_mm[i] / 25.4, 2) for i in range(h_zone_num)], "Zone_End": [round(h_boundaries_mm[i+1] / 25.4, 2) for i in range(h_zone_num)], "Relative_Time": [1.0] * h_zone_num}
             st.session_state.head_zone_df = pd.DataFrame(h_data)
 
-    st.session_state.head_zone_df = st.data_editor(st.session_state.head_zone_df, hide_index=True, disabled=not is_head_custom, key="head_zone_editor")
+    
+
+    st.session_state.head_zone_df = st.data_editor(st.session_state.head_zone_df, hide_index=True, disabled=not is_head_custom, 
+                column_config={ "Zone": st.column_config.Column(disabled=True), 
+                                "Zone_Start": st.column_config.Column(disabled=True), 
+                                "Zone_End": st.column_config.Column(disabled=True),},
+                key="head_zone_editor")
     st.session_state.SWPS_MIN = st.slider("**Head Swps per minute**", 1, 25, int(st.session_state.SWPS_MIN))
     
    
@@ -111,12 +118,14 @@ with col2:
     disk_mode = st.radio("**Disk Sweep Mode**", ["Sine", "Custom"], horizontal=True, key="disk_sweep_mode_radio")
     st.session_state.disk_mode = disk_mode
     is_custom = (disk_mode == "Custom")
-    zone_num = st.number_input("**Disk Sweep Zone Num**", 10, 20, 13, disabled=not is_custom, key="zone_num_input")
+    
 
     c1, c2 = st.columns(2)
     with c1: st.session_state.DSWEEP_START = st.number_input("**Disk NEAR (END) (in)**", 2.0, 6.0, float(st.session_state.DSWEEP_START), 0.1, key="ds_start")
     with c2: st.session_state.DSWEEP_END = st.number_input("**Disk FAR (START) (in)**", 7.0, 15.0, float(st.session_state.DSWEEP_END), 0.1, key="ds_end")
     
+    zone_num = st.number_input("**Disk Sweep Zone Num**", 10, 20, 13, disabled=not is_custom, key="zone_num_input")
+
     d_near_mm, d_far_mm = st.session_state.DSWEEP_START * 25.4, st.session_state.DSWEEP_END * 25.4
     zone_boundaries_mm = [d_far_mm - (d_far_mm - d_near_mm) * i / zone_num for i in range(zone_num + 1)]
     
@@ -131,9 +140,13 @@ with col2:
         st.session_state.zone_df = pd.DataFrame({"ID": [f"Zone {i+1}" for i in range(zone_num)], "Zone_Start": [round(zone_boundaries_mm[i] / 25.4, 2) for i in range(zone_num)], "Zone_End": [round(zone_boundaries_mm[i+1] / 25.4, 2) for i in range(zone_num)], "Relative_Time": rel_times})
     else:
         if "zone_df" not in st.session_state or len(st.session_state.zone_df) != zone_num:
-            st.session_state.zone_df = pd.DataFrame({"ID": [f"Zone {i+1}" for i in range(zone_num)], "Zone_Start": [round(zone_boundaries_mm[i] / 25.4, 2) for i in range(zone_num)], "Zone_End": [round(zone_boundaries_mm[i+1] / 25.4, 2) for i in range(zone_num)], "Relative_Time": [1.0] * zone_num})
+            st.session_state.zone_df = pd.DataFrame({"Zone": [f"Zone {i+1}" for i in range(zone_num)], "Zone_Start": [round(zone_boundaries_mm[i] / 25.4, 2) for i in range(zone_num)], "Zone_End": [round(zone_boundaries_mm[i+1] / 25.4, 2) for i in range(zone_num)], "Relative_Time": [1.0] * zone_num})
 
-    st.session_state.zone_df = st.data_editor(st.session_state.zone_df, hide_index=True, disabled=not is_custom, key="zone_data_editor_final")
+    st.session_state.zone_df = st.data_editor(st.session_state.zone_df, hide_index=True, disabled=not is_custom, 
+                    column_config={ "Zone": st.column_config.Column(disabled=True), 
+                                    "Zone_Start": st.column_config.Column(disabled=True), 
+                                    "Zone_End": st.column_config.Column(disabled=True),},
+                    key="zone_data_editor_final")
     st.session_state.DSWPS_MIN = st.slider("Disk Swps per minute", 1, 20, int(st.session_state.DSWPS_MIN))
     
     d_half_cycle_time = (60.0 / st.session_state.DSWPS_MIN) / 2.0
@@ -434,7 +447,7 @@ fig.add_shape(
 fig.add_trace(go.Scatter(name="Point 1 (Blue) Traj", x=[], y=[], mode="lines", line=dict(color=c_blue, width=w_blue)), row=1, col=1)
 fig.add_trace(go.Scatter(name="Point 2 (Green) Traj", x=[], y=[], mode="lines", line=dict(color=c_green, width=w_green)), row=1, col=1)
 fig.add_trace(go.Scatter(name="Wafer Center Traj", x=[], y=[], mode="lines", line=dict(color="black", width=1, dash="dot")), row=1, col=1)
-fig.add_trace(go.Scatter(name="Disk Traj", x=[], y=[], mode="lines", line=dict(color=c_orange, width=w_orange, dash="dot")), row=1, col=1)
+fig.add_trace(go.Scatter(name="Disk Traj", x=[], y=[], mode="lines", line=dict(color=c_orange, width=w_orange)), row=1, col=1)
 fig.add_trace(go.Scatter(name="Platen Edge Traj", x=[], y=[], mode="lines", line=dict(color="rgba(0,0,0,0.3)", width=1)), row=1, col=1)
 fig.add_trace(go.Scatter(name="Head Arm", x=[], y=[], mode="lines", line=dict(color="orange", width=1)), row=1, col=1)
 
@@ -446,7 +459,7 @@ fig.add_trace(go.Scatter(name="Current Positions", x=[], y=[], mode="markers",
 fig.add_trace(go.Scatter(name="Dist P1", x=[], y=[], mode="lines", line=dict(color="blue")), row=2, col=1)
 fig.add_trace(go.Scatter(name="Dist P2", x=[], y=[], mode="lines", line=dict(color="green")), row=2, col=1)
 fig.add_trace(go.Scatter(name="Dist Wafer", x=[], y=[], mode="lines", line=dict(color="black", dash="dot")), row=2, col=1)
-fig.add_trace(go.Scatter(name="Dist Disk", x=[], y=[], mode="lines", line=dict(color="orange", dash="dot")), row=2, col=1)
+fig.add_trace(go.Scatter(name="Dist Disk", x=[], y=[], mode="lines", line=dict(color="orange")), row=2, col=1)
 
 
 # -------------------------------------------------
@@ -472,7 +485,9 @@ for i in range(STEPS_TOTAL):
             go.Scatter(x=times, y=dist_d[:i+1]),  # 10
         ],
         layout=go.Layout(annotations=[dict(x=0.02, y=0.98, xref="paper", yref="paper", 
-            text=f"Platen Rev: {platen_rev[i]:.1f} | Wafer Rev: {wafer_rev[i]:.1f}", showarrow=False)])
+            text=f"Platen Rev: {platen_rev[i]:.1f} | Wafer Rev: {wafer_rev[i]:.1f}", showarrow=False,                        font=dict(size=12, color="black"),
+                        bgcolor="rgba(255,255,255,0.7)",
+                        bordercolor="black", borderwidth=1, align="left")])
     ))
 
 fig.frames = frames
