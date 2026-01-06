@@ -50,6 +50,13 @@ with st.sidebar:
     st.session_state.STEP_SEC = st.slider("Second per STEP", 0.01, 0.1, float(st.session_state.STEP_SEC))
     st.session_state.TOTAL_TIME = st.slider("TOTAL_TIME (s)", 1, 99, int(st.session_state.TOTAL_TIME))
     st.session_state.POINTA_RADIUS = st.number_input("PointA Radius (mm)", 1, 150, st.session_state.POINTA_RADIUS)
+    
+    STEP_SEC   = st.session_state.STEP_SEC
+    TOTAL_TIME = st.session_state.TOTAL_TIME
+    STEPS_TOTAL = int(TOTAL_TIME / STEP_SEC) + 1   
+    last = STEPS_TOTAL - 1
+
+    st.caption(f"Total Steps is **{TOTAL_TIME/STEP_SEC:.0f}** (must < 1000)")
     st.divider()
     # Visibility toggles for plot elements
     st.checkbox("Show Point 1 (Blue)", key="SHOW_BLUE")
@@ -58,6 +65,7 @@ with st.sidebar:
 # -------------------------------------------------
 # 3️⃣ Main UI: Detailed Sweep Parameters
 # -------------------------------------------------
+
 with st.container(border=True):
     col1, col2 = st.columns(2)
     
@@ -444,22 +452,22 @@ fig.add_shape(
 )
 
 
-fig.add_trace(go.Scatter(name="Point 1 (Blue) Traj", x=[], y=[], mode="lines", line=dict(color=c_blue, width=w_blue)), row=1, col=1)
-fig.add_trace(go.Scatter(name="Point 2 (Green) Traj", x=[], y=[], mode="lines", line=dict(color=c_green, width=w_green)), row=1, col=1)
-fig.add_trace(go.Scatter(name="Wafer Center Traj", x=[], y=[], mode="lines", line=dict(color="black", width=1, dash="dot")), row=1, col=1)
-fig.add_trace(go.Scatter(name="Disk Traj", x=[], y=[], mode="lines", line=dict(color=c_orange, width=w_orange)), row=1, col=1)
-fig.add_trace(go.Scatter(name="Platen Edge Traj", x=[], y=[], mode="lines", line=dict(color="rgba(0,0,0,0.3)", width=1)), row=1, col=1)
-fig.add_trace(go.Scatter(name="Head Arm", x=[], y=[], mode="lines", line=dict(color="orange", width=1)), row=1, col=1)
+fig.add_trace(go.Scatter(name="Point 1 (Blue) Traj", x=[], y=[], mode="lines", line=dict(color=c_blue, width=w_blue, shape="spline", smoothing=1.3)), row=1, col=1)
+fig.add_trace(go.Scatter(name="Point 2 (Green) Traj", x=[], y=[], mode="lines", line=dict(color=c_green, width=w_green, shape="spline", smoothing=1.3)), row=1, col=1)
+fig.add_trace(go.Scatter(name="Wafer Center Traj", x=[], y=[], mode="lines", line=dict(color="black", width=1, shape="spline", smoothing=1.3, dash="dot")), row=1, col=1)
+fig.add_trace(go.Scatter(name="Disk Traj", x=[], y=[], mode="lines", line=dict(color=c_orange, width=w_orange, shape="spline", smoothing=1.3)), row=1, col=1)
+fig.add_trace(go.Scatter(name="Platen Edge Traj", x=[], y=[], mode="lines", line=dict(color="rgba(0,0,0,0.3)", width=1, shape="spline", smoothing=1.3)), row=1, col=1)
+fig.add_trace(go.Scatter(name="Head Arm", x=[], y=[], mode="lines", line=dict(color="orange", width=1, shape="spline", smoothing=1.3)), row=1, col=1)
 
 
 fig.add_trace(go.Scatter(name="Current Positions", x=[], y=[], mode="markers", 
                          marker=dict(size=6, color=[c_blue, c_green, "black", c_orange])), row=1, col=1)
 
 
-fig.add_trace(go.Scatter(name="Dist P1", x=[], y=[], mode="lines", line=dict(color="blue")), row=2, col=1)
-fig.add_trace(go.Scatter(name="Dist P2", x=[], y=[], mode="lines", line=dict(color="green")), row=2, col=1)
-fig.add_trace(go.Scatter(name="Dist Wafer", x=[], y=[], mode="lines", line=dict(color="black", dash="dot")), row=2, col=1)
-fig.add_trace(go.Scatter(name="Dist Disk", x=[], y=[], mode="lines", line=dict(color="orange")), row=2, col=1)
+fig.add_trace(go.Scatter(name="Dist P1", x=[], y=[], mode="lines", line=dict(color="blue", shape="spline", smoothing=1.3)), row=2, col=1)
+fig.add_trace(go.Scatter(name="Dist P2", x=[], y=[], mode="lines", line=dict(color="green", shape="spline", smoothing=1.3)), row=2, col=1)
+fig.add_trace(go.Scatter(name="Dist Wafer", x=[], y=[], mode="lines", line=dict(color="black", dash="dot", shape="spline", smoothing=1.3)), row=2, col=1)
+fig.add_trace(go.Scatter(name="Dist Disk", x=[], y=[], mode="lines", line=dict(color="orange", shape="spline", smoothing=1.3)), row=2, col=1)
 
 
 # -------------------------------------------------
