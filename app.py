@@ -18,7 +18,7 @@ st.markdown(
 # 1️⃣ Initialize Session State (Ensure all variables exist)
 # -------------------------------------------------
 DEFAULTS = {
-    "STEP_SEC": 0.02,
+    "STEP_SEC": 0.05,
     "TOTAL_TIME": 10,
     "PLATEN_RPM": 86,
     "POINTA_RPM": 92,
@@ -56,7 +56,7 @@ with st.sidebar:
     STEPS_TOTAL = int(TOTAL_TIME / STEP_SEC) + 1   
     last = STEPS_TOTAL - 1
 
-    st.caption(f"Total Steps is **{TOTAL_TIME/STEP_SEC:.0f}** (must < 1000)")
+    st.caption(f"Total Steps: **{TOTAL_TIME/STEP_SEC:.0f}** (must < 1000)")
     st.divider()
     # Visibility toggles for plot elements
     st.checkbox("Show Point 1 (Blue)", key="SHOW_BLUE")
@@ -78,9 +78,9 @@ with col1:
    
     hc1, hc2 = st.columns(2)
     with hc1:
-        st.session_state.SWEEP_START = st.number_input("**Head START (in)**", 6.0, 7.0, 6.2, 0.1, key="h_start_input")
+        st.session_state.SWEEP_START = st.number_input("**Head START (in)**", 7.0, 8.0, 7.2, 0.1, key="h_start_input")
     with hc2:
-        st.session_state.SWEEP_END = st.number_input("**Head END (in)**", 7.0, 9.0, 7.2, 0.1, key="h_end_input")
+        st.session_state.SWEEP_END = st.number_input("**Head END (in)**", 8.0, 9.0, 8.2, 0.1, key="h_end_input")
     
     h_zone_num = st.number_input("**Head Sweep Zone Num**", 8, 13, 10, disabled=not is_head_custom, key="h_zone_num_input")
 
