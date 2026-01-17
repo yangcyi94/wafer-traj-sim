@@ -216,3 +216,73 @@ if st.button("🚀 Update & Generate Plot", use_container_width=True):
                                                      {"label": "Pause", "method": "animate", "args": [[None], {"mode": "immediate"}]}]}]
     )
     st.plotly_chart(fig, use_container_width=True)
+
+    # ---------------------------------------------------------
+    # 2. 在這裡添加：停留時間統計邏輯 (放置在按鈕判斷式內)
+    # ---------------------------------------------------------
+    # --- 5. 新增：Point 1 與 Disk 停留時間分佈計算 ---
+    st.divider()
+    st.subheader("📊 徑向停留時間分佈分析 (Dwell Time Distribution)")
+
+    # 定義區間邊界
+    bins = [0, 50, 100, 150, 200, 250, 300, 350, 390]
+    bin_labels = [f"{bins[i]}~{bins[i+1]}" for i in range(len(bins)-1)]
+
+    # --- 計算 Point 1 (Blue) ---
+    p1_radii = np.hypot(p1x, p1y)
+    p1_counts, _ = np.histogram(p1_radii, bins=bins)
+    p1_dwell = p1_counts * STEP_SEC
+    p1_percent = (p1_dwell / p1_dwell.sum() * 100) if p1_dwell.sum() > 0 else p1_dwell * 0
+
+    # --- 計算 Disk (Orange) ---
+    disk_radii = np.hypot(dx, dy) # 使用之前計算好的 dx, dy
+    disk_counts, _ = np.histogram(disk_radii, bins=bins)
+    disk_dwell = disk_counts * STEP_SEC
+    disk_percent = (disk_dwell / disk_dwell.sum() * 100) if disk_dwell.sum() > 0 else disk_dwell * 0
+
+    # 建立整合後的 DataFrame
+    analysis_df = pd.DataFrame({
+        "Radius Range (mm)": bin_labels,
+        "P1 Dwell (s)": p1_dwell.round(3),
+        "P1 Percentage (%)": p1_percent.round(2),
+        "Disk Dwell (s)": disk_dwell.round(3),
+        "Disk Percentage (%)": disk_percent.round(2)
+    })
+
+    # UI 佈局：上方顯示總表，下方顯示對比圖
+    st.dataframe(analysis_df, hide_index=True, use_container_width=True)
+
+    # 繪製對比長條圖
+    fig_compare = go.Figure()
+
+    # 加入 Point 1 序列
+    fig_compare.add_trace(go.Bar(
+        x=bin_labels,
+        y=p1_percent,
+        name="Point 1 (Wafer Blue)",
+        marker_color='royalblue',
+        text=p1_percent.round(1).astype(str) + '%',
+        textposition='auto',
+    ))
+
+    # 加入 Disk 序列
+    fig_compare.add_trace(go.Bar(
+        x=bin_labels,
+        y=disk_percent,
+        name="Disk (Orange)",
+        marker_color='darkorange',
+        text=disk_percent.round(1).astype(str) + '%',
+        textposition='auto',
+    ))
+
+    fig_compare.update_layout(
+        title="Point 1 vs Disk 停留時間佔比對比",
+        xaxis_title="研磨盤半徑區間 (mm)",
+        yaxis_title="時間佔比 (%)",
+        barmode='group', # 並列顯示
+        height=500,
+        margin=dict(l=20, r=20, t=60, b=20),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+
+    st.plotly_chart(fig_compare, use_container_width=True)
