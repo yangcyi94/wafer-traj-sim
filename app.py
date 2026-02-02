@@ -1,4 +1,4 @@
-#last update: 260119
+#last update: 260202
 
 import streamlit as st
 import numpy as np
@@ -47,7 +47,7 @@ with st.sidebar:
     st.header("⚙️ Setting")
     PLATEN_RPM = st.number_input("Platen RPM", 0, 200, 86)
     HEAD_RPM = st.number_input("Head RPM", 0, 200, 92)
-    STEP_SEC = st.slider("Second per STEP", 0.05, 0.1, 0.05)
+    #STEP_SEC = st.slider("Second per STEP", 0.05, 0.1, 0.05)
     TOTAL_TIME = st.slider("TOTAL_TIME (s)", 1, 99, 10)
     POINTA_RADIUS = st.number_input("PointA Radius (mm)", 1, 150, 100)
     st.divider()
@@ -98,6 +98,7 @@ with col2:
     d_swps = st.slider("Disk Swps per minute", 1, 30, 13)
 
 # --- 3. core cal. Main loop ---
+STEP_SEC = 0.5
 if st.button("🚀 Update & Generate Plot", use_container_width=True):
     t = np.arange(0, TOTAL_TIME + STEP_SEC, STEP_SEC)
     
